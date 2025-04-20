@@ -2,7 +2,7 @@
 HighBasic is a basic hobbyist dynamically typed programming language
 
 Coming up for 1.1_0:
-- Static alternative to defining variables: `string <var> <string>`
+- Static alternative to defining variables: `string <var> <string>` and `num <var> <num>`
 - New command `print <string>|$<varName>` to print without the \n at the end
 
 ### Table of Contents:
