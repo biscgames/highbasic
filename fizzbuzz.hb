@@ -1,7 +1,4 @@
-module "stdlibrary/iterate.hb"
-
 num cnt 0
-
 var loopEnd 20
 macro loop
     : Initalize
@@ -16,5 +13,4 @@ macro loop
     in macro loop equalInt buzz 0 print "Buzz"
     in macro loop unlessInt buzz 0 unlessInt fizz 0 print $cnt
     in macro loop print $!newline
-
-macro startLoop
+iterate 0 $loopEnd loop
