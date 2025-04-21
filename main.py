@@ -10,8 +10,9 @@
 from shlex import split as lexSplit
 from sys import argv as args
 
+cut = False
 variables = {
-    "!ver": "1.2",
+    "!ver": "1.2_1",
     "!newline": "\n",
     "!emptyline": "",
     "!$": "$"
@@ -166,8 +167,9 @@ def concat(arg:list):
     for right in rights:
         variables[testForVariable(arg[0])] += testForVariable(right)
 def iterate(arg:list):
+    cut = False
     i = int(testForVariable(arg[0]))
-    while i < int(testForVariable(arg[1])):
+    while i < int(testForVariable(arg[1])) and not cut:
         interpretEach(macros[testForVariable(arg[-1])])
         i += 1
 def nick(arg:list):
@@ -177,6 +179,8 @@ def nick(arg:list):
     else:
         macros[testForVariable(arg[2])] = macros[testForVariable(arg[1])]
         del macros[testForVariable(arg[1])]
+def cutFunc(arg:list):
+    cut = True
 functions = {
     "var":var,
     "operator":operator,
@@ -202,7 +206,8 @@ functions = {
     "del": destroy,
     "concat": concat,
     "iterate": iterate,
-    "nick": nick
+    "nick": nick,
+    "cut": cutFunc
 }
 
 def main():
