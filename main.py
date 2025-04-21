@@ -11,9 +11,10 @@ from shlex import split as lexSplit
 from sys import argv as args
 
 variables = {
-    "!ver": "1.1_0",
+    "!ver": "1.2",
     "!newline": "\n",
-    "!emptyline": ""
+    "!emptyline": "",
+    "!$": "$"
 }
 functions = {}
 
@@ -164,6 +165,18 @@ def concat(arg:list):
     rights = arg[1:]
     for right in rights:
         variables[testForVariable(arg[0])] += testForVariable(right)
+def iterate(arg:list):
+    i = int(testForVariable(arg[0]))
+    while i < int(testForVariable(arg[1])):
+        interpretEach(macros[testForVariable(arg[-1])])
+        i += 1
+def nick(arg:list):
+    if not testForVariable(arg[0]) == "macro":
+        functions[testForVariable(arg[1])] = functions[testForVariable(arg[0])]
+        del functions[testForVariable(arg[0])]
+    else:
+        macros[testForVariable(arg[2])] = macros[testForVariable(arg[1])]
+        del macros[testForVariable(arg[1])]
 functions = {
     "var":var,
     "operator":operator,
@@ -187,7 +200,9 @@ functions = {
     "print": printtc,
     "module": module,
     "del": destroy,
-    "concat": concat
+    "concat": concat,
+    "iterate": iterate,
+    "nick": nick
 }
 
 def main():
