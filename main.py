@@ -1,3 +1,5 @@
+# 1.3 MAY BE VERY UNSTABLE.. YOU MAY USE 1.2_1 FROM HBARCHIVE
+
 # 2025 BISCGAMES
 # --- DISCORD: biscgames
 # --- GITHUB: biscgames
@@ -9,15 +11,17 @@
 
 from shlex import split as lexSplit
 from sys import argv as args
+import traceback
 
 cut = False
 variables = {
-    "!ver": "1.2_1",
+    "!ver": "1.3",
     "!newline": "\n",
     "!emptyline": "",
     "!$": "$"
 }
 functions = {}
+classes = {}
 
 def interpretEach(code:list):
     for i,token in enumerate(code):
@@ -28,7 +32,7 @@ def interpretEach(code:list):
         try:
             functions[tokenSplit[0]](tokenSplit[1:])
         except Exception as e:
-            print("Error in line {}: {}\nException: {}".format(i," ".join(tokenSplit),e))
+            traceback.print_exception(e)
 
 def convertToNum(value:str):
     try:
@@ -52,16 +56,30 @@ def testForVariable(value:str):
             val = variables[value[pointer:]]
             value = value.replace(value[pointer:],str(val))
             value = value[1:]
+    else:
+        if ">>" in value:
+            classRef = value.split(">>")
+            if classRef[0] in classes:
+                return classes[classRef[0]][classRef[1]] if not isinstance(classes[classRef[0]][classRef[1]],list) else "MACRO"
+            else:
+                return variables[classRef[0]][classRef[1]] if not isinstance(variables[classRef[0]][classRef[1]],list) else "MACRO"
     return value
 def println(arg:list):
     print(testForVariable(arg[0]))
 def var(arg:list):
     val = testForVariable(arg[0])
     value = convertToNum(testForVariable(arg[1])) if str(testForVariable(arg[1])).isdigit() else testForVariable(arg[1])
-    if not val.startswith("!"):
-        variables[val] = value
-    else: 
-        print("Attempt to modify read-only variable handled with this message. Variable: {}".format(arg[0]))
+    if not "." in val:
+        if not val.startswith("!") or not val in variables:
+            variables[val] = value
+        else: 
+            print("Attempt to modify read-only variable handled with this message. Variable: {}".format(arg[0]))
+    else:
+        item,prop = val.split(".",1)
+        if not item in variables:
+            print("o0w =eo0ooot0-iii-kfe")
+            return
+        variables[item][prop] = value
 def operator(arg:list):
     left = testForVariable(arg[0])
     if isinstance(variables[left],str):
@@ -94,13 +112,28 @@ macros = {
 def passfunc(arg:list):
     pass
 def macro(arg:list):
-    if not testForVariable(arg[0]) in macros:
-        macros[testForVariable(arg[0])] = []
+    val = testForVariable(arg[0])
+    if not val in macros:
+        if "." in val:
+            item = val.split(".")[0]
+            var = val.split(".")[1]
+
+            arr = list(s.replace("this",item) for s in (classes[item][var] if item in classes else variables[item][var]))
+            interpretEach(arr)
+        else:
+            macros[val] = []
     else:
-        interpretEach(macros[testForVariable(arg[0])])
+        interpretEach(macros[val])
 def inItem(arg:list):
+    item = testForVariable(arg[1])
     if arg[0] == "macro":
-        macros[testForVariable(arg[1])].append(" ".join(arg[2:]))
+        macros[item].append(" ".join(arg[2:]))
+    else:
+        if not arg[0] in classes[item]:
+            classes[item][arg[0]] = []
+        if (len(arg) > 2):
+            classes[item][arg[0]].append(" ".join(arg[2:]))
+
 def readln(arg:list):
     if not arg[1].startswith("!"): variables[arg[1]] = input(arg[0])
     else: print("Attempt to modify read-only variable handled with this message. Variable: {}".format(arg[1]))
@@ -167,6 +200,7 @@ def concat(arg:list):
     for right in rights:
         variables[testForVariable(arg[0])] += testForVariable(right)
 def iterate(arg:list):
+    global cut
     cut = False
     i = int(testForVariable(arg[0]))
     while i < int(testForVariable(arg[1])) and not cut:
@@ -180,7 +214,20 @@ def nick(arg:list):
         macros[testForVariable(arg[2])] = macros[testForVariable(arg[1])]
         del macros[testForVariable(arg[1])]
 def cutFunc(arg:list):
+    global cut
     cut = True
+def classFor(arg:list):
+    val = testForVariable(arg[0])
+    variables[val] = classes[testForVariable(arg[1])]
+    if "classConstructor" in variables[val].keys():
+        interpretEach(s.replace("this",val) for s in variables[val]["classConstructor"])
+
+def classFunc(arg:list):
+    classes[testForVariable(arg[0])] = {}
+def getClassVal(arg:list):
+    val = testForVariable(arg[0])
+    arg1 = testForVariable(arg[1])
+    variables[testForVariable(arg[-1])] = classes[val][arg1] if val in classes else variables[val][arg1]
 functions = {
     "var":var,
     "operator":operator,
@@ -207,7 +254,10 @@ functions = {
     "concat": concat,
     "iterate": iterate,
     "nick": nick,
-    "cut": cutFunc
+    "cut": cutFunc,
+    "classFor": classFor,
+    "class": classFunc,
+    "classVal": getClassVal
 }
 
 def main():
