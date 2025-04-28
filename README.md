@@ -44,6 +44,16 @@ var n 15
 operator n 2 *
 println $n
 ```
+`arg $<var> $<index>` gets the extra arguments recieved by the macro
+</br>Examples:
+```hb
+macro gayify
+in macro gayify arg name 0
+in macro gayify concat name " but gay"
+in macro gayify println $name
+
+macro gayify extraArgument
+```
 ## Working with standard in and out
 `println <string>|$<var>` prints a line to the console! It can take a literal string or the value of a variable
 </br>Examples:
@@ -125,3 +135,7 @@ unlessString answer $correct println "Incorrect!"
 : This is a comment
 # So is this
 ```
+`class $<name>` creates a class. You can add a macro using `in <name> $<class> <command>`.
+To reference a class variable use `class>>variable`. Set one, use `var class.variable 420`, to run a class macro use `macro class.variable`.
+`classFor $<var> $<class>` assigns a class to a variable, then runs its classConstructor macro if it exists
+(tip: if you're inside of a class macro looking to have it reference its own variables, use the `this` keyword. e.g: `this>>variable` `var this.var 4` `macro this.macro`)
