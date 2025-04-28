@@ -1,5 +1,3 @@
-# 1.3 MAY BE VERY UNSTABLE.. YOU MAY USE 1.2_1 FROM HBARCHIVE
-
 # 2025 BISCGAMES
 # --- DISCORD: biscgames
 # --- GITHUB: biscgames
@@ -15,13 +13,14 @@ import traceback
 
 cut = False
 variables = {
-    "!ver": "1.3",
+    "!ver": "1.3_1",
     "!newline": "\n",
     "!emptyline": "",
     "!$": "$"
 }
 functions = {}
 classes = {}
+arguments = []
 
 def interpretEach(code:list):
     for i,token in enumerate(code):
@@ -112,6 +111,7 @@ macros = {
 def passfunc(arg:list):
     pass
 def macro(arg:list):
+    global arguments
     val = testForVariable(arg[0])
     if not val in macros:
         if "." in val:
@@ -119,6 +119,7 @@ def macro(arg:list):
             var = val.split(".")[1]
 
             arr = list(s.replace("this",item) for s in (classes[item][var] if item in classes else variables[item][var]))
+            if len(arg) > 2: arguments = arg[2:]
             interpretEach(arr)
         else:
             macros[val] = []
@@ -217,10 +218,15 @@ def cutFunc(arg:list):
     global cut
     cut = True
 def classFor(arg:list):
+    global arguments
     val = testForVariable(arg[0])
     variables[val] = classes[testForVariable(arg[1])]
     if "classConstructor" in variables[val].keys():
+        if len(arg)>2: arguments = arg[2:]
         interpretEach(s.replace("this",val) for s in variables[val]["classConstructor"])
+def getArg(arg:list):
+    global arguments
+    var([arg[0],arguments[int(testForVariable(arg[1]))]])
 
 def classFunc(arg:list):
     classes[testForVariable(arg[0])] = {}
@@ -257,7 +263,8 @@ functions = {
     "cut": cutFunc,
     "classFor": classFor,
     "class": classFunc,
-    "classVal": getClassVal
+    "classVal": getClassVal,
+    "arg": getArg
 }
 
 def main():
