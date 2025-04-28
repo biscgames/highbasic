@@ -135,6 +135,14 @@ unlessString answer $correct println "Incorrect!"
 : This is a comment
 # So is this
 ```
+`group <name>` doesn't do much but improve readability by grouping certain things of an object.
+```hb
+var apples 5
+var applesConcat $!emptyline
+group "appending concat"
+  concat applesConcat $apples " apples"
+println $applesConcat
+```
 `class $<name>` creates a class. You can add a macro using `in <name> $<class> <command>`.
 To reference a class variable use `class>>variable`. Set one, use `var class.variable 420`, to run a class macro use `macro class.variable`.
 `classFor $<var> $<class>` assigns a class to a variable, then runs its classConstructor macro if it exists
